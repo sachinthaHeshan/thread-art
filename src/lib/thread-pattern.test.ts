@@ -273,4 +273,12 @@ describe("renderBoard", () => {
 
     assert.equal(thickest, 1);
   });
+
+  it("ignores threads that point past the current pin count", () => {
+    const size = 80;
+    const image = renderBoard([{ from: 0, to: 12 }], 4, size, 1);
+    const blank = renderBoard([], 4, size, 0);
+
+    assert.deepEqual(image, blank);
+  });
 });

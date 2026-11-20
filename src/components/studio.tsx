@@ -33,8 +33,8 @@ export function Studio() {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isWorking, setIsWorking] = useState(false);
-  const [pinCount, setPinCount] = useState("");
-  const [lineCount, setLineCount] = useState("");
+  const [pinCount, setPinCount] = useState("300");
+  const [lineCount, setLineCount] = useState("4000");
   const [tune, setTune] = useState<ThreadTune>(DEFAULT_THREAD_TUNE);
 
   useEffect(() => {
@@ -284,7 +284,7 @@ function Comparison({
           id="pin-count"
           label="Pins"
           value={pinCount}
-          placeholder="240"
+          placeholder="300"
           error={countError(pinCount, 3, 1000, "Use 3 to 1,000 pins.")}
           onChange={onPinCountChange}
         />
@@ -292,7 +292,7 @@ function Comparison({
           id="line-count"
           label="Thread lines"
           value={lineCount}
-          placeholder="3000"
+          placeholder="4000"
           error={countError(lineCount, 1, 20000, "Use 1 to 20,000 lines.")}
           onChange={onLineCountChange}
         />

@@ -229,6 +229,7 @@ export function renderBoard(
   for (const segment of segments) {
     const start = pins[segment.from];
     const end = pins[segment.to];
+    if (!start || !end) continue;
     const angle = Math.atan2(end.y - start.y, end.x - start.x);
 
     for (const pixel of linePixels(start.x, start.y, end.x, end.y, size)) {

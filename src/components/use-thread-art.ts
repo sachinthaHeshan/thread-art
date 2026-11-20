@@ -16,10 +16,10 @@ export function useThreadArt(
   lineCount: number | null,
   tune: ThreadTune,
 ) {
-  const [threads, setThreads] = useState<ThreadSegment[]>([]);
-  const [progress, setProgress] = useState<number | null>(null);
+  const [plan, setPlan] = useState<ThreadPlan>({ key: "", threads: [], progress: null });
   const ready = pinCount !== null && lineCount !== null;
   const { weight, minDistance, memory } = tune;
+  const key = ready ? `${imageUrl}|${pinCount}|${lineCount}|${weight}|${minDistance}|${memory}` : "";
 
   useEffect(() => {
     if (pinCount === null || lineCount === null) return;
@@ -27,8 +27,7 @@ export function useThreadArt(
     let cancelled = false;
     const timer = setTimeout(() => {
       void (async () => {
-        setProgress(0);
-        setThreads([]);
+        setPlan({ key, threads: [], progress: 0 });
 
         try {
           const darkness = await sampleCircle(imageUrl, SAMPLE_SIZE);
@@ -43,20 +42,17 @@ export function useThreadArt(
             isCancelled: () => cancelled,
             onProgress: (done, partial) => {
               if (cancelled) return;
-              setProgress(done);
-              if (done % 120 === 0) setThreads(partial);
+              setPlan((current) => ({
+                key,
+                threads: done % 120 === 0 ? partial : current.key === key ? current.threads : [],
+                progress: done,
+              }));
             },
           });
 
-          if (!cancelled) {
-            setThreads(segments);
-            setProgress(null);
-          }
+          if (!cancelled) setPlan({ key, threads: segments, progress: null });
         } catch {
-          if (!cancelled) {
-            setThreads([]);
-            setProgress(null);
-          }
+          if (!cancelled) setPlan({ key, threads: [], progress: null });
         }
       })();
     }, 180);
@@ -65,13 +61,21 @@ export function useThreadArt(
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [imageUrl, pinCount, lineCount, weight, minDistance, memory]);
+  }, [imageUrl, key, lineCount, memory, minDistance, pinCount, weight]);
+
+  const current = plan.key === key ? plan : null;
 
   return {
-    threads: ready ? threads : [],
-    progress: ready ? progress : null,
+    threads: current?.threads ?? [],
+    progress: current?.progress ?? null,
   };
 }
+
+type ThreadPlan = {
+  key: string;
+  threads: ThreadSegment[];
+  progress: number | null;
+};
 
 async function sampleCircle(url: string, size: number) {
   const image = await loadImage(url);
